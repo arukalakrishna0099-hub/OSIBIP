@@ -30,10 +30,6 @@ random-password-generator/
 ├── random_password_generator.py
 └── README.md
 
-## 🚀 How to Run
-
-### Clone the Repository
-
 ---------- Random Password Generator ----------
 
 Enter the password length (minimum 4): 12

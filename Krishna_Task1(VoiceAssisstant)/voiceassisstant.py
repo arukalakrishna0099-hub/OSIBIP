@@ -8,12 +8,18 @@ import webbrowser
 import os
 import random
 import smtplib
+import getpass
 
+# Initialize pyttsx3
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
 engine.setProperty('voice', voices[1].id)
 
-email_dict = {"friend": "friend@example.com", "family": "family@example.com"}  
+# Email dictionary - add your actual contacts
+email_dict = {
+    "friend": "friend@example.com",
+    "family": "family@example.com"
+}
 
 def speak(audio):
     engine.say(audio)
@@ -33,16 +39,20 @@ def wishMe():
 
 def takecommand():
     r = sr.Recognizer()
-    with sr.Microphone() as source:
-        print("Listening...")
-        r.pause_threshold = 1
-        audio = r.listen(source)
+    try:
+        with sr.Microphone() as source:
+            print("Listening...")
+            r.pause_threshold = 1
+            audio = r.listen(source)
+    except Exception as e:
+        print(f"Microphone error: {e}")
+        speak("I couldn't access your microphone. Please check it.")
+        return "None"
 
     try:
         print("Recognizing...")
         query = r.recognize_google(audio, language='en-in')
         print(f"User said: {query}\n")
-
     except Exception as e:
         print(e)
         print("Say that again please...")
@@ -50,32 +60,66 @@ def takecommand():
     return query
 
 def sendEmail(to, content):
+    # Get email credentials securely - DON'T hardcode passwords!
+    # Option 1: Use environment variables (recommended)
+    # email_user = os.environ.get('EMAIL_USER')
+    # email_password = os.environ.get('EMAIL_PASSWORD')
+    
+    # Option 2: Input at runtime (for testing)
+    email_user = 'jestonpatel9879@gmail.com'
+    email_password = getpass.getpass("Enter your email password: ")  # More secure
+    
+    # Use Gmail with APP PASSWORD (not regular password) - enable in Gmail settings
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.ehlo()
     server.starttls()
-    # Enter your email
-    server.login('jestonpatel9879@gmail.com', 'codesownway0707')
-    server.sendmail('jasonhunts0707@gmail.com', to, content)
-    server.close()
+    server.ehlo()
+    
+    try:
+        server.login(email_user, email_password)
+        # Use same email for sender as login
+        server.sendmail(email_user, to, content)
+        server.close()
+        return True
+    except Exception as e:
+        print(f"Email error: {e}")
+        server.close()
+        return False
 
 if __name__ == "__main__":
     wishMe()
     while True:
         query = takecommand().lower()
+        
+        # Skip if no valid command was received
+        if query == "None":
+            continue
+        
+        # Exit commands
+        if query in ['exit', 'stop', 'quit', 'goodbye']:
+            speak("Shutting down Hunterdii. Goodbye!")
+            break
 
         if 'wikipedia' in query:
             speak('Searching Wikipedia...')
-            query = query.replace("wikipedia", "")
-            results = wikipedia.summary(query, sentences=2)
-            speak("According to Wikipedia")
-            print(results)
-            speak(results)
+            query = query.replace("wikipedia", "").strip()
+            if not query:
+                speak("Please tell me what to search on Wikipedia")
+                continue
+            try:
+                results = wikipedia.summary(query, sentences=2)
+                speak("According to Wikipedia")
+                print(results)
+                speak(results)
+            except Exception as e:
+                speak(f"Sorry, I couldn't find information about {query}")
+                print(f"Wikipedia error: {e}")
 
         elif 'open youtube' in query:
-            webbrowser.open("youtube.com")
+            webbrowser.open("https://youtube.com")
 
         elif 'open google' in query:
-            webbrowser.open("google.com")
+            webbrowser.open("https://google.com")
 
         elif 'play music' in query:
             music_url = "https://music.youtube.com/playlist?list=PLIL965-SXjbVEiWwe1l6RApWYDnbhc_Oz&si=g69JUw7JlEO2s0k2"
@@ -85,58 +129,69 @@ if __name__ == "__main__":
 
         elif 'the time' in query:
             strTime = datetime.datetime.now().strftime("%H:%M:%S")
-            speak(f"Sir , the current time is {strTime}")
+            speak(f"Sir, the current time is {strTime}")
 
         elif 'open code' in query:
-            codepath = "C:\\Users\\hetpa\\OneDrive\\Desktop\\Python Programs\\server.py"
-            os.startfile(codepath)
+            # FIXED: Use os.system instead of os.startfile
+            codepath = r"C:\Users\hetpa\OneDrive\Desktop\Python Programs\server.py"
+            os.system(f'start "" "{codepath}"')
 
         elif 'search google for' in query:
-            search_query = query.replace('search google for', '')
+            search_query = query.replace('search google for', '').strip()
             webbrowser.open(f"https://www.google.com/search?q={search_query}")
 
         elif 'search youtube for' in query:
-            search_query = query.replace('search youtube for', '')
+            search_query = query.replace('search youtube for', '').strip()
             webbrowser.open(f"https://www.youtube.com/results?search_query={search_query}")
 
         elif 'search in hindi for' in query:
-            search_query = query.replace('search in hindi for', '')
-            search_query = search_query.encode('utf-8')
+            search_query = query.replace('search in hindi for', '').strip()
             webbrowser.open(f"https://www.google.com/search?hl=hi&q={search_query}")
 
         elif 'search in gujarati for' in query:
-            search_query = query.replace('search in gujarati for', '')
-            search_query = search_query.encode('utf-8')
+            search_query = query.replace('search in gujarati for', '').strip()
             webbrowser.open(f"https://www.google.com/search?hl=gu&q={search_query}")
 
         elif 'send email to' in query:
             try:
                 speak("What should I say?")
                 content = takecommand()
-                speak("Who should I send it to? ")
+                if content == "None":
+                    speak("I didn't catch what you want to say")
+                    continue
+                    
+                speak("Who should I send it to?")
                 recipient = takecommand().lower()
+                
+                # FIXED: Check if recipient exists in dictionary
+                if recipient not in email_dict:
+                    speak(f"Sorry, I don't have an email for {recipient}. Available contacts: {', '.join(email_dict.keys())}")
+                    continue
+                    
                 to = email_dict[recipient]
-                sendEmail(to, content)
-                speak("Email has been sent!")
+                if sendEmail(to, content):
+                    speak("Email has been sent!")
+                else:
+                    speak("Sorry, I am not able to send this email.")
             except Exception as e:
                 print(e)
                 speak("Sorry, I am not able to send this email.")
 
         elif 'open notepad' in query:
-            os.system("start notepad.exe")
+            os.system("notepad.exe")
 
         elif 'open calculator' in query:
-            os.system("start calc.exe")
+            os.system("calc.exe")
 
         elif 'open command prompt' in query:
-            os.system("start cmd.exe")
-
-        # elif 'play a game' in query:
-        #     game_path = "C:\\Games\\game.exe"  
-        #     os.startfile(game_path)
+            os.system("cmd.exe")
 
         elif 'shutdown' in query:
-            os.system("shutdown /s /t 1")
+            speak("Shutting down your computer in 1 second...")
+            time.sleep(1)
+            os.system("shutdown /s /t 0")
 
         elif 'restart' in query:
-            os.system("shutdown /r /t 1")
+            speak("Restarting your computer in 1 second...")
+            time.sleep(1)
+            os.system("shutdown /r /t 0")

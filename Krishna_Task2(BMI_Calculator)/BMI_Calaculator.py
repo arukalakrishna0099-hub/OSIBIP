@@ -15,8 +15,8 @@ def get_float_input(message):
                 return value
         except ValueError:
             print("Invalid input. Please enter a valid number.")
-  
-    def get_inches_input(message):
+
+def get_inches_input(message):
     """
     Safely get inches input (0 to 11) from the user.
     Allows 0 for cases like exactly 5'0".
@@ -29,40 +29,50 @@ def get_float_input(message):
             else:
                 return value
         except ValueError:
-            print("Invalid input. Please enter a valid number."     
-  print("--------BMI Calculator--------\n")
-#get weight
-weight = get_float_input("Enter your weight in kilograms: ")
+            print("Invalid input. Please enter a valid number.")
 
-#  #height from the user in feet and inches
-feet = get_float_input("Enter your height in feet: ")
-inches= get_float_input("Enter the remaining inches:")
+#classify BMI based on standard categories
+def classify_bmi(bmi):  
+    if bmi < 18.5:
+        category="You are underweight."
+    elif 18.5 <= bmi < 25:
+        category="You have a normal weight."
+    elif 25 <= bmi < 30:
+        category="You are overweight."
+    else:
+        category="You are obese."
+    #categorize the BMI
+    print(category)
+    print("---------------") 
 
-#convert feet + inches -> meters 
-total_inches=(feet * 12) + inches
-height_meters= total_inches * 0.0254
 
-#avoid division by zero
-if height_meters == 0:
-    print("\nError: Height cannot be zero.")
-    exit()
 
-#calculate BMI
-bmi = weight / (height_meters ** 2)
+def main():
+    print("--------BMI Calculator--------\n")
+    #get weight
+    weight = get_float_input("Enter your weight in kilograms: ")
 
-#ouput the result
-print("\n your height in meters is :", round(height_meters, 3))
-print("Your BMI is :", round(bmi, 2))
+    #  #height from the user in feet and inches
+    feet = get_float_input("Enter your height in feet: ")
+    inches= get_inches_input("Enter the remaining inches:")
 
-#classify BMI 
-if bmi < 18.5:
-    category="You are underweight."
-elif 18.5 <= bmi < 25:
-    category="You have a normal weight."
-elif 25 <= bmi < 30:
-    category="You are overweight."
-else:
-    category="You are obese."
+    #convert feet + inches -> meters 
+    total_inches=(feet * 12) + inches
+    height_meters= total_inches * 0.0254
 
-print(category)
-print("---------------")
+    #avoid division by zero
+    if height_meters == 0:
+        print("\nError: Height cannot be zero.")
+        exit()
+    #calculate BMI
+    bmi = weight / (height_meters ** 2)
+
+    #ouput the result
+    print("\n your height in meters is :", round(height_meters, 3))
+    print("Your BMI is :", round(bmi, 2))
+    category = classify_bmi(bmi)
+    print(f"Category: {category}")
+    print("--------------------------------")
+
+if __name__ == "__main__":
+    main()

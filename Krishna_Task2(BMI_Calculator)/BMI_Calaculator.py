@@ -15,9 +15,22 @@ def get_float_input(message):
                 return value
         except ValueError:
             print("Invalid input. Please enter a valid number.")
-
-print("--------BMI Calculator--------\n")
-
+  
+    def get_inches_input(message):
+    """
+    Safely get inches input (0 to 11) from the user.
+    Allows 0 for cases like exactly 5'0".
+    """
+    while True:
+        try:
+            value = float(input(message))
+            if value < 0 or value >= 12:
+                print("Please enter inches between 0 and 11.")
+            else:
+                return value
+        except ValueError:
+            print("Invalid input. Please enter a valid number."     
+  print("--------BMI Calculator--------\n")
 #get weight
 weight = get_float_input("Enter your weight in kilograms: ")
 

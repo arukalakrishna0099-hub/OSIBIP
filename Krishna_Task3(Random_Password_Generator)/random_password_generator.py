@@ -10,7 +10,7 @@ while True:
     try:
         length = int(length_input)
         if length <4:
-            print("length should at least 4.please try again.\n")
+            print("password length should at least 4.please try again.\n")
         else:
             break
     except ValueError:
@@ -46,7 +46,7 @@ if use_special=="y":
 # if user gave very small lenght (less than the slected types) adjust the length 
 if length < len(password_list):
     print("\n error:passsword lenght is too small or selected options")
-    print("you selected", len(password_list), "types but lenght is only", length)
+    print(f"You selected {len(password_list)} character types, but the password length is only {length}.")
     sys.exit(1)
 
 #fill the rest of the password with random characters from the char_set

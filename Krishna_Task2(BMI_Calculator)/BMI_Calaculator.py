@@ -44,7 +44,7 @@ def classify_bmi(bmi):
     #categorize the BMI
     print(category)
     print("---------------") 
-
+    return category
 
 
 def main():
@@ -68,11 +68,12 @@ def main():
     bmi = weight / (height_meters ** 2)
 
     #ouput the result
-    print("\n your height in meters is :", round(height_meters, 3))
-    print("Your BMI is :", round(bmi, 2))
+    print(f"\nHeight: {height_meters:.3f} m")
+    print(f"BMI: {bmi:.2f}")
     category = classify_bmi(bmi)
+    print(f"\nYour BMI is: {bmi:.2f}")
     print(f"Category: {category}")
-    print("--------------------------------")
+
 
 if __name__ == "__main__":
     main()
